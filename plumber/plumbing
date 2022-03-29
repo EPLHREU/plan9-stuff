@@ -7,7 +7,7 @@ include basic
 
 # match python trackback file and line numbers 
 type is text
-data matches '.+File "(.*)", line ([0-9]+).*$?'
+data matches '.*File "(.*)", line ([0-9]+).*$?'
 arg isfile		$1
 data set		$file
 attr add		addr=$2
