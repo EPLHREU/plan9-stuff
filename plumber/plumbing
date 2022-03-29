@@ -1,0 +1,15 @@
+# Put
+# cat $HOME/lib/plumbing | 9p write plumb/rules
+
+editor = acme
+
+include basic
+
+# match python trackback file and line numbers 
+type is text
+data matches '.+File "(.*)", line ([0-9]+).*$?'
+arg isfile		$1
+data set		$file
+attr add		addr=$2
+plumb to edit
+plumb client $editor
