@@ -1,0 +1,17 @@
+#!/bin/sh
+
+args="-a -c3"
+
+if [ ! "$(pgrep plumber)" ]; then
+	plumber &
+fi
+
+if [ ! "$(pgrep fontsrv)" ]; then
+	fontsrv &
+fi
+
+if [ "$(fontsrv -p ./IBMPlexSerif/12/font)" ]; then
+	args=$args "-F /mnt/font/IBMPlexSerif/12/font"
+fi
+
+acme $args $*
