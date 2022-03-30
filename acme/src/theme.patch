@@ -1,0 +1,157 @@
+diff --git a/src/cmd/acme/acme.c b/src/cmd/acme/acme.c
+index d001a2a8..9517c838 100644
+--- a/src/cmd/acme/acme.c
++++ b/src/cmd/acme/acme.c
+@@ -39,8 +39,8 @@ Rune	snarfrune[NSnarf+1];
+ 
+ char		*fontnames[2] =
+ {
+-	"/lib/font/bit/lucsans/euro.8.font",
+-	"/lib/font/bit/lucm/unicode.9.font"
++	"/usr/local/plan9/font/lucsans/euro.8.font",
++	"/usr/local/plan9/font/lucm/unicode.9.font"
+ };
+ 
+ Command *command;
+@@ -383,7 +383,7 @@ int erroutfd;
+ void
+ acmeerrorproc(void *v)
+ {
+-	char *buf;
++	char *buf, *s;
+ 	int n;
+ 
+ 	USED(v);
+@@ -391,7 +391,9 @@ acmeerrorproc(void *v)
+ 	buf = emalloc(8192+1);
+ 	while((n=read(errorfd, buf, 8192)) >= 0){
+ 		buf[n] = '\0';
+-		sendp(cerr, estrdup(buf));
++		s = estrdup(buf);
++		sendp(cerr, s);
++		free(s);
+ 	}
+ 	free(buf);
+ }
+@@ -1032,6 +1034,8 @@ Cursor2 boxcursor2 = {
+ 	 0x00, 0x00, 0x00, 0x00}
+ };
+ 
++#include "col.h"
++
+ void
+ iconinit(void)
+ {
+@@ -1039,19 +1043,19 @@ iconinit(void)
+ 	Image *tmp;
+ 
+ 	if(tagcols[BACK] == nil) {
+-		/* Blue */
+-		tagcols[BACK] = allocimagemix(display, DPalebluegreen, DWhite);
+-		tagcols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPalegreygreen);
+-		tagcols[BORD] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPurpleblue);
+-		tagcols[TEXT] = display->black;
+-		tagcols[HTEXT] = display->black;
+-
+-		/* Yellow */
+-		textcols[BACK] = allocimagemix(display, DPaleyellow, DWhite);
+-		textcols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DDarkyellow);
+-		textcols[BORD] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DYellowgreen);
+-		textcols[TEXT] = display->black;
+-		textcols[HTEXT] = display->black;
++		/* Tag Colours */
++		tagcols[BACK] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, TAG_BACK);
++		tagcols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, TAG_HIGH);
++		tagcols[BORD] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, TAG_BORD);
++		tagcols[TEXT] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, TAG_TEXT);
++		tagcols[HTEXT] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, TAG_HTEXT);
++
++		/* Body Colours */
++		textcols[BACK] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, BODY_BACK);
++		textcols[HIGH] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, BODY_HIGH);
++		textcols[BORD] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, BODY_BORD);
++		textcols[TEXT] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, BODY_TEXT);
++		textcols[HTEXT] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, BODY_HTEXT);
+ 	}
+ 
+ 	r = Rect(0, 0, Scrollwid+ButtonBorder, font->height+1);
+@@ -1064,26 +1068,26 @@ iconinit(void)
+ 		freeimage(colbutton);
+ 	}
+ 
+-	button = allocimage(display, r, screen->chan, 0, DNofill);
++	button = allocimage(display, r, screen->chan, 0, DWhite);
+ 	draw(button, r, tagcols[BACK], nil, r.min);
+ 	r.max.x -= ButtonBorder;
+ 	border(button, r, ButtonBorder, tagcols[BORD], ZP);
+ 
+ 	r = button->r;
+-	modbutton = allocimage(display, r, screen->chan, 0, DNofill);
++	modbutton = allocimage(display, r, screen->chan, 0, DWhite);
+ 	draw(modbutton, r, tagcols[BACK], nil, r.min);
+ 	r.max.x -= ButtonBorder;
+ 	border(modbutton, r, ButtonBorder, tagcols[BORD], ZP);
+ 	r = insetrect(r, ButtonBorder);
+-	tmp = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DMedblue);
++	tmp = allocimage(display, Rect(0,0,1,1), screen->chan, 1, LAYOUT_BOX);
+ 	draw(modbutton, r, tmp, nil, ZP);
+ 	freeimage(tmp);
+ 
+ 	r = button->r;
+-	colbutton = allocimage(display, r, screen->chan, 0, DPurpleblue);
++	colbutton = allocimage(display, r, screen->chan, 0, BUTTON);
+ 
+-	but2col = allocimage(display, r, screen->chan, 1, 0xAA0000FF);
+-	but3col = allocimage(display, r, screen->chan, 1, 0x006600FF);
++	but2col = allocimage(display, r, screen->chan, 1, BUT_2);
++	but3col = allocimage(display, r, screen->chan, 1, BUT_3);
+ }
+ 
+ /*
+diff --git a/src/cmd/acme/col.h b/src/cmd/acme/col.h
+new file mode 100644
+index 00000000..fc761323
+--- /dev/null
++++ b/src/cmd/acme/col.h
+@@ -0,0 +1,29 @@
++/* define colour codes as per theme */
++#define YUKARI_BG 0x282c30FF
++#define YUKARI_BASE0 0x1c2024FF
++#define YUKARI_BASE5 0x5b6265FF
++#define YUKARI_WHITE 0xf8f8f8FF
++
++#define YUKARI_RED 0x931c12FF
++#define YUKARI_DARKBLUE 0x9ba8beFF
++#define YUKARI_MAGENTA 0xa24ed1FF
++
++
++/* assign theme to elements */
++#define TAG_BACK YUKARI_BASE0
++#define TAG_HIGH YUKARI_MAGENTA
++#define TAG_BORD YUKARI_BASE0
++#define TAG_TEXT YUKARI_BASE5
++#define TAG_HTEXT YUKARI_WHITE
++
++#define BODY_BACK YUKARI_BG
++#define BODY_HIGH YUKARI_MAGENTA
++#define BODY_BORD YUKARI_BASE0
++#define BODY_TEXT YUKARI_WHITE
++#define BODY_HTEXT YUKARI_WHITE
++
++#define BUTTON YUKARI_MAGENTA
++#define LAYOUT_BOX YUKARI_RED
++
++#define BUT_2 YUKARI_RED
++#define BUT_3 YUKARI_DARKBLUE
+diff --git a/src/cmd/acme/mkfile b/src/cmd/acme/mkfile
+index 18bea9e0..765198ee 100644
+--- a/src/cmd/acme/mkfile
++++ b/src/cmd/acme/mkfile
+@@ -29,6 +29,7 @@ OFILES=\
+ HFILES=dat.h\
+ 	edit.h\
+ 	fns.h\
++	col.h\
+ 
+ <$PLAN9/src/mkone
+ <$PLAN9/src/mkdirs
