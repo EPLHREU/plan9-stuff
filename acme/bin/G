@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# I : don't search binary files
+# r : recursive search
+# i : case insensitive search
+# n : include line numbers
+# e : read in pattern to search for
+
+grep . -Irine $@
+
