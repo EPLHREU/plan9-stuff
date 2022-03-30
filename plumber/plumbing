@@ -1,11 +1,16 @@
-# Put
-# cat $HOME/lib/plumbing | 9p write plumb/rules
+# Put  cat $HOME/lib/plumbing | 9p write plumb/rules
 
+# variables
 editor = acme
+jira1 = ******
+jira1projs = ******
+jira2 = ******
+
 
 include basic
 
-# match python trackback file and line numbers 
+
+# match python tracekback file and line numbers
 type is text
 data matches '.*File "(.*)", line ([0-9]+).*$?'
 arg isfile		$1
@@ -13,3 +18,17 @@ data set		$file
 attr add		addr=$2
 plumb to edit
 plumb client $editor
+
+# match against JIRA IDs specifically on instance 1
+type is text
+data matches	$jira1projs'-[0-9]+'
+data set  $jira1/browse/$0
+plumb to web
+plumb start web $data
+
+# match against JIRA IDs
+type is text
+data matches	'[A-Z]+-[0-9]+'
+data set 	$jira2/browse/$0
+plumb to web
+plumb start web $data
