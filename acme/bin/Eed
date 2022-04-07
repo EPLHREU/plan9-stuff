@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# ------ Eed (External edit)  :- edit the current file in an external text editor ------
+# usage
+# Eed [editor]
+
+# --- configuration ---
+TERMINAL=urxvt
+DEFAULT=nvim
+
+# --- script ---
+if [ $# -eq 0 ]; then  # use the default editor if not specified
+	EDITOR=$DEFAULT
+else
+	EDITOR=$@
+fi
+
+FILE=$(9p read acme/$winid/tag | cut -d ' ' -f 1)  # read the file name
+
+$TERMINAL -e $EDITOR $FILE  # edit the file
+
+echo clean | 9p write acme/$winid/ctl  # mark acme file as clean
+echo get | 9p write acme/$winid/ctl  # read in new changes
