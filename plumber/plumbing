@@ -1,14 +1,30 @@
-# Put  cat $HOME/lib/plumbing | 9p write plumb/rules
+#      cat $HOME/lib/plumbing | 9p write plumb/rules
 
 # variables
 editor = acme
-jira1 = ******
-jira1projs = ******
-jira2 = ******
+path = [a-zA-Z¡-￿0-9_\-./@]+
 
+# include variables with sensitive information
+include secrets
 
-include basic
+# ------ override basic plumbing ------
 
+# match people's email addresses to the internal directory
+type is text
+data matches '[a-zA-Z¡-￿0-9_\-./@]+'
+data matches	'([a-zA-Z0-9_+.\-]+)@cisco.com'
+data set	$directory/$1
+plumb to web
+plumb start web $data
+
+# match bash error messages and line number
+type is text
+data matches	'([.a-zA-Z¡-￿0-9_/\-]+): line ([0-9]+).*'
+arg isfile	$1
+data set $file
+attr add addr=$2
+plumb to edit
+plumb client $editor
 
 # match python tracekback file and line numbers
 type is text
@@ -19,10 +35,28 @@ attr add		addr=$2
 plumb to edit
 plumb client $editor
 
+include basic
+
+# ------ custom rules ------
+
+# match page IDs against confluence pages
+type is text
+data matches 	'pageId=[0-9]+'
+data set 	$confluence/conf/pages/viewpage.action?$0
+plumb to web
+plumb start web $data
+
 # match against JIRA IDs specifically on instance 1
 type is text
 data matches	$jira1projs'-[0-9]+'
 data set  $jira1/browse/$0
+plumb to web
+plumb start web $data
+
+# match against JIRA IDs specifically on a seperate instance
+type is text
+data matches	$jirabrdprojs'-[0-9]+'
+data set  $jirabrd/browse/$0
 plumb to web
 plumb start web $data
 
@@ -32,3 +66,5 @@ data matches	'[A-Z]+-[0-9]+'
 data set 	$jira2/browse/$0
 plumb to web
 plumb start web $data
+
+# keep the newline at the end!
