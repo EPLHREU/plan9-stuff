@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# ------ acme sshfs ------
+# usage
+# acme-sshfs [username] ip [port] file
+
+# assign varibales to arguments
+
+name="$1"
+ip="$2"
+port="$3"
+file="$4"
+dirName=$(dirname $file)
+baseName=$(basename $file)
+
+# set defaults for variables (current user, and port 22) - an underscore is an unknown value
+
+if [ "$name" == "_" ]; then
+	name=$USER
+fi
+if [ "$port" == "_" ]; then
+	port=22
+fi
+
+# make file path unique for directory name and non-syntax clashing
+
+replacedFile=$(sed 's/\//-/g' <<<$dirName)
+
+# create format for directory, used to uniquly identify every possible sshfs connection, with limited clashing
+
+mountDir=$HOME/.sshfs/$name-$ip-$port-$replacedFile
+
+# create and mount the remote directory, allowing for nicer usability
+
+mkdir $mountDir
+sshfs  -odebug,sshfs_debug,loglevel=debug -o idmap=user,transform_symlinks $name@$ip:$dirName -p $port $mountDir
+
+# open the file in acme :D
+
+plumb $mountDir/$baseName
