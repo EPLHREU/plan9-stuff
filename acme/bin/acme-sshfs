@@ -33,7 +33,7 @@ mountDir=$HOME/.sshfs/$name-$ip-$port-$replacedFile
 # create and mount the remote directory, allowing for nicer usability
 
 mkdir $mountDir
-sshfs  -odebug,sshfs_debug,loglevel=debug -o idmap=user,transform_symlinks $name@$ip:$dirName -p $port $mountDir
+sshfs -o idmap=user,transform_symlinks $name@$ip:$dirName -p $port $mountDir
 
 # open the file in acme :D
 
