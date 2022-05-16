@@ -16,26 +16,26 @@ include secrets
 # mount sshfs:/ files with sshfs and locally edit
 # user port
 type is text
-data matches 'sshfs:(([a-z]+)@)([0-9|.]+)(#([0-9]+)):([\/a-zA-Z\.~_]+)'
-plumb start acme-sshfs $2 $3 $5 $6
+data matches 'ssh:(([a-z]+)@)([0-9|.]+)(#([0-9]+)):([\/a-zA-Z\.~_]+)'
+plumb start acme-ssh $2 $3 $5 $6
 
 # mount sshfs:/ files with sshfs and locally edit
 # user no port
 type is text
-data matches 'sshfs:(([a-z]+)@)([0-9|.]+):([\/a-zA-Z\.~_]+)'
-plumb start acme-sshfs $2 $3 _ $4
+data matches 'ssh:(([a-z]+)@)([0-9|.]+):([\/a-zA-Z\.~_]+)'
+plumb start acme-ssh $2 $3 _ $4
 
 # mount sshfs:/ files with sshfs and locally edit
 # no user port
 type is text
-data matches 'sshfs:([0-9|.]+)(#([0-9]+)):([\/a-zA-Z\.~_]+)'
-plumb start acme-sshfs _ $1 $3 $4
+data matches 'ssh:([0-9|.]+)(#([0-9]+)):([\/a-zA-Z\.~_]+)'
+plumb start acme-ssh _ $1 $3 $4
 
 # mount sshfs:/ files with sshfs and locally edit
 # no user no port
 type is text
-data matches 'sshfs:([0-9|.]+):([\/a-zA-Z\.~_]+)'
-plumb start acme-sshfs _ $1 _ $2
+data matches 'ssh:([0-9|.]+):([\/a-zA-Z\.~_]+)'
+plumb start acme-ssh _ $1 _ $2
 
 # --- sshfs ---
 
