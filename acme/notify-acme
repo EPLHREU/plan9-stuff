@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo "------ Notifcation ------
+
+$*" | 9p write acme/new/body
