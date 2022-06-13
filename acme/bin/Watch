@@ -17,13 +17,13 @@ currentdir=$(pwd)
 
 cmd=$*
 if [ -z "$cmd" ]; then
+	cmd="/bin/sh ./.watch"
 	echo Usage: Watch [filepath] command
-	exit -1
 fi
 
 sha=0
 update_sha() {
-	sha=`/bin/ls -lR --time-style=full-iso $filepath | sha1sum`
+	sha=`/bin/ls -lRT $filepath | sha1sum`
 }
 update_sha
 previous_sha=$sha
