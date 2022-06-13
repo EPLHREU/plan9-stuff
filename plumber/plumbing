@@ -94,7 +94,7 @@ type is text
 data matches	'[a-zA-Z¡-￿0-9_\-./@]+'
 data matches	'([a-zA-Z¡-￿0-9_\-./@]+)\.(c(ab|pio)|[jw]ar|zip|bz2?|a(lz|ce|r[cj])?|deb|t([l7xg]z|Z|bz2?|ar(\.(lzo?|Z|[7xg]z|bz2?))?|zo)|Z|r(pm|z|ar)|l(ha|z(ma|[ho])?|rz)|7[xz]|[xg]z)'
 arg isfile		$0
-plumb start atool-extrtact-to-archive-dir $file
+plumb start atool-extract-to-archive-dir $file
 
 # --- directories are opened in acme ---
 
