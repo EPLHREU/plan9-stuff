@@ -1,45 +1,45 @@
-#      cat $HOME/lib/plumbing | 9p write plumb/rules
+#				cat $HOME/lib/plumbing | 9p write plumb/rules
 
-# variables
+# --- variables ---
+home = /home/emi
 editor = acme
 path = [a-zA-Z¡-￿0-9_\-./@]+
 
 # include variables with sensitive information
 include secrets
 
+
+
 # ------ override basic plumbing ------
 
 
+# --- ssh ---
 
-# --- sshfs ---
-
-# mount sshfs:/ files with sshfs and locally edit
+# mount ssh:/ files with sshfs and locally edit
 # user port
 type is text
 data matches 'ssh:(([a-z]+)@)([0-9|.]+)(#([0-9]+)):([\/a-zA-Z\.~_]+)'
 plumb start acme-ssh $2 $3 $5 $6
 
-# mount sshfs:/ files with sshfs and locally edit
+# mount ssh:/ files with sshfs and locally edit
 # user no port
 type is text
 data matches 'ssh:(([a-z]+)@)([0-9|.]+):([\/a-zA-Z\.~_]+)'
 plumb start acme-ssh $2 $3 _ $4
 
-# mount sshfs:/ files with sshfs and locally edit
+# mount ssh:/ files with sshfs and locally edit
 # no user port
 type is text
 data matches 'ssh:([0-9|.]+)(#([0-9]+)):([\/a-zA-Z\.~_]+)'
 plumb start acme-ssh _ $1 $3 $4
 
-# mount sshfs:/ files with sshfs and locally edit
+# mount ssh:/ files with sshfs and locally edit
 # no user no port
 type is text
 data matches 'ssh:([0-9|.]+):([\/a-zA-Z\.~_]+)'
 plumb start acme-ssh _ $1 _ $2
 
-# --- sshfs ---
-
-
+# --- work ---
 
 # match people's email addresses to the internal directory
 type is text
@@ -48,6 +48,18 @@ data matches	'([a-zA-Z0-9_+.\-]+)@cisco.com'
 data set	$directory/$1
 plumb to web
 plumb start web $data
+
+# --- line numbers ---
+
+# match LSP style line numbers : file.ext:36:2-36:8:
+type is text
+data matches	'[a-zA-Z0-9_\-./:]+'
+data matches	'([.a-zA-Z¡-￿0-9_/\-@]*[a-zA-Z¡-￿0-9_/\-]):([0-9]+):([0-9]+)-([0-9]+):([0-9]+):'
+arg isfile	$1
+data set	$file
+attr add	addr=$2-#0+#$3-#1,$4-#0+#$5-#1
+plumb to edit
+plumb start $editor
 
 # match bash error messages and line number
 type is text
@@ -67,9 +79,40 @@ attr add		addr=$2
 plumb to edit
 plumb client $editor
 
+# --- tilde notation home directory ---
+
+type is text
+data matches '~/([.a-zA-Z¡-￿0-9_/\-@]*[a-zA-Z¡-￿0-9_/\-])'
+arg isfile $home/$1
+data set $home/$1
+plumb to edit
+plumb client $editor
+
+# --- archive files are extracted via atool --- regex generated with: https://github.com/noprompt/frak#command-line-usage
+
+type is text
+data matches	'[a-zA-Z¡-￿0-9_\-./@]+'
+data matches	'([a-zA-Z¡-￿0-9_\-./@]+)\.(c(ab|pio)|[jw]ar|zip|bz2?|a(lz|ce|r[cj])?|deb|t([l7xg]z|Z|bz2?|ar(\.(lzo?|Z|[7xg]z|bz2?))?|zo)|Z|r(pm|z|ar)|l(ha|z(ma|[ho])?|rz)|7[xz]|[xg]z)'
+arg isfile		$0
+plumb start atool-extrtact-to-archive-dir $file
+
+# --- directories are opened in acme ---
+
+type is text
+data matches '([.a-zA-Z¡-￿0-9_/\-@]*[a-zA-Z¡-￿0-9_/\-])'
+arg isdir	$1
+data set	$dir
+plumb to edit
+plumb client $editor
+
+
+# ------ default options ------
+
 include basic
 
-# ------ custom rules ------
+
+
+# --- new custom rules ---
 
 # match page IDs against confluence pages
 type is text

@@ -1,17 +1,58 @@
 #!/bin/sh
 
-args="-a -c3"
+args="-a -c3 "
 
-if [ ! "$(pgrep plumber)" ]; then
-	plumber &
-fi
+# --- launch preRun programs --- 
 
-if [ ! "$(pgrep fontsrv)" ]; then
-	fontsrv &
+supportingStart () {
+	if [ ! "$(pgrep $1)" ]; then
+		$1 &
+	fi	
+}
+
+for program in plumber fontsrv; do
+	supportingStart $program
+done
+
+# --- set default fonts ---
+
+if [ "$(fontsrv -p ./IBMPlexMono/12/font)" ]; then
+	args+="-f /mnt/font/IBMPlexMono/10a/font " 
 fi
 
 if [ "$(fontsrv -p ./IBMPlexSerif/12/font)" ]; then
-	args=$args "-F /mnt/font/IBMPlexSerif/12/font"
+	args+="-F /mnt/font/IBMPlexSerif/12a/font " 
 fi
 
+# --- launch postrun programs --- 
+
+function postRun {
+	if [ ! "$(pgrep acmefocused)" ]; then
+		acmefocused &
+	fi	
+	
+	if [ ! "$(pgrep acme-lsp)" ]; then
+		acme-lsp\
+					-server '\.py:pylsp'\
+					-server '\.sh:bash-language-server start'\
+					-server '(\.erl)|(\.hrl):erlang_ls'\
+					-server '\.tex:texlab'\
+					-v &
+					#-server '(\.groovy)|(Jenkinsfile):java -jar /Users/emilye/git/groovy-language-server/build/libs/groovy-language-server-all.jar'\
+	fi	
+}
+
+$(sleep 3 && postRun) &
+
+# --- run acme ---
+
+export acmeshell=/usr/local/plan9/bin/rc
+export TERM=dumb
+
 acme $args $*
+
+# --- kill supporting programs upon exit ---
+
+for support in plumber fontsrv acmefocused acme-lsp; do
+	pkill $support
+done

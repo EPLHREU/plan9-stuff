@@ -1,0 +1,2 @@
+#!/Users/emilye/git/plan9port-2k/bin/rc
+exec L hov $*

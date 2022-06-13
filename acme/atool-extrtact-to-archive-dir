@@ -1,0 +1,5 @@
+#!/bin/sh
+
+#atool -X `{dirname $1} $1
+directory=$(atool -X $(dirname $1) $1 2>&1 | head -n 1 | cut -c3-)
+plumb $(dirname $1)/$directory
