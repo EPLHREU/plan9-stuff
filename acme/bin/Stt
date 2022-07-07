@@ -1,0 +1,14 @@
+#!/bin/sh
+
+level=$*
+if [ -z "$level" ]; then
+	level=4
+fi
+
+spaces=""
+
+for x in $(seq $level); do
+	spaces="$spaces "
+done
+
+sed "s/$spaces/	/g"

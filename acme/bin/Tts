@@ -1,0 +1,8 @@
+#!/bin/sh
+
+level=$*
+if [ -z "$level" ]; then
+	level=4
+fi
+
+expand -t $level
