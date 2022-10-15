@@ -1,0 +1,5 @@
+#!/bin/bash
+cd ~/git
+print $1
+git clone $1
+plumb $(pwd)/$(basename $1 | rev | cut -c 5- | rev)

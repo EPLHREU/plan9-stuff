@@ -1,0 +1,3 @@
+#!/bin/bash
+curl -O -J $1
+plumb $(pwd)/$(basename $1)
