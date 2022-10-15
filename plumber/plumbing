@@ -44,7 +44,7 @@ plumb start acme-ssh _ $1 _ $2
 # match people's email addresses to the internal directory
 type is text
 data matches '[a-zA-Z¡-￿0-9_\-./@]+'
-data matches	'([a-zA-Z0-9_+.\-]+)@cisco.com'
+data matches	'([a-zA-Z0-9_+.\-]+)@'$emailDomain
 data set	$directory/$1
 plumb to web
 plumb start web $data
@@ -105,6 +105,30 @@ data set	$dir
 plumb to edit
 plumb client $editor
 
+# --- automatically clone and open git repositories ---
+# --- HTTPS ---
+
+type is text
+data matches	'https?://.*\.git'
+plumb start clone-git-and-open $0
+
+# --- SSH ---
+
+type is text
+data matches	'git@.*\.git'
+plumb start clone-git-and-open $0
+
+
+# --- download files provided via url and open ---
+
+type is text
+data matches 'https?.*\.(HTML?|p(hp|l)|rb|aspx?|jsp?|html?|cgi)'
+plumb to web
+plumb start web $0
+
+type is text
+data matches 'https?.*\.[a-z]+'
+plumb start download-and-open $0
 
 # ------ default options ------
 
