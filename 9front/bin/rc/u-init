@@ -1,0 +1,7 @@
+#!/bin/rc
+
+rfork n
+bind /mnt/term/net /net
+aux/listen1 -t tcp!*!12335 /bin/exportfs -r / &
+os mkdir -p /tmp/drawterm
+os 9pfuse localhost:12335 /tmp/drawterm

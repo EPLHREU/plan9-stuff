@@ -1,0 +1,4 @@
+#!/bin/rc
+window 'cat /usr/emi/lib/theme/rio.emi.theme > /mnt/wsys/theme'
+window -r 0 35 3840 2160 rio
+window -r 30 0 3840 35 winwatch

@@ -1,0 +1,41 @@
+#!/bin/rc
+# ws - pseudo virtual workspaces for rio
+# usage: ws n
+#
+# bugs: the ws workspaces are not isolated from each other, if you need
+#       that open a fullscreen window in each ws workspace and run
+#       plumber followed by rio in it. even then rio is still blissfully
+#       unaware of such "workspaces".
+
+# set some defaults
+rfork ne
+tmp=$home/tmp/ws
+winid=`{cat /dev/winid}
+
+# initialize 1st desktop on first run
+if(! test -d $tmp){
+    mkdir -p $tmp
+    touch $tmp/1
+    echo 1 > $tmp/currentws
+    ls -np /mnt/wsys/wsys > $tmp/`{cat $tmp/currentws}
+}
+
+# update window lists
+ls -np /mnt/wsys/wsys > $tmp/riowindows
+cat $tmp/[0-9]* | sort -n > $tmp/wswindows
+comm -23 $tmp/riowindows $tmp/wswindows >> $tmp/`{cat $tmp/currentws}
+for(i in `{comm -13 $tmp/riowindows $tmp/wswindows}){
+    for(w in $tmp/[0-9]*) sed '/^'$i'$/d' $w > $tmp/TMP && mv $tmp/TMP $w
+}
+currentws=`{cat $tmp/currentws}
+# no args: echo current ws (after updating windows) and exit
+if(~ $#* 0){ echo $currentws && exit }
+touch $tmp/$1
+
+# switch desktop
+if(~ $1 $currentws){ echo this is workspace $1 && exit }
+for(i in `{cat $tmp/`{cat $tmp/currentws} | sed '/^'$winid'$/d' })
+    echo hide > /mnt/wsys/wsys/$i^/wctl
+echo $1 > $tmp/currentws
+for(i in `{cat $tmp/`{cat $tmp/currentws}}) echo unhide > /mnt/wsys/wsys/$i^/wctl
+echo hide > /mnt/wsys/wsys/$winid^/wctl

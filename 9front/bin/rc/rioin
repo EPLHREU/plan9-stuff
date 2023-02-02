@@ -1,0 +1,2 @@
+#!/bin/rc
+window 'cat /usr/emi/lib/theme/rio.emi.theme > /mnt/wsys/theme'

@@ -1,0 +1,4 @@
+#!/bin/rc
+
+dir=/tmp/drawterm/`{pwd}
+os -d $dir $*

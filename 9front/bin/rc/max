@@ -1,0 +1,63 @@
+#!/bin/rc
+# max - maximize windows
+# usage: max [orientation] [winid]
+#
+# orientation can be: f (fullscreen), l (left), r (right), t (top), b (bottom),
+# tl (top-left), tr (top-right), bl (bottom-left), br (bottom-right) or u
+# (unmaximize), default is fullscreen.
+#
+# bugs: if you are maximizing another window, orientation is required
+#       unmaximize is only useful right after maximizing a window.
+
+# set some defaults
+if(test -r /env/scr) {
+	screensize=(0 0 `{echo $scr | awk -Fx '{ print $1, $2 }'})
+}
+if not{
+	screensize=(0 0 `{echo $vgasize | awk -Fx '{ print $1, $2 }'})
+}
+
+if(~ $#windowsize 0)
+    windowsize=`{dd -if /dev/window -bs 1 -count 70 -quiet 1 |
+    awk '{ print $2, $3, $4, $5}'}
+window=/dev/wctl
+if(~ $#* 0) echo resize -r $screensize > $window
+if(~ $#* 2) window=/mnt/wsys/wsys/$2/wctl
+if(test $#* -gt 2){
+    echo usage: max [orientation] [winid] >[2=1]
+    exit
+}
+
+# maximize window
+echo current > $window
+switch $1 {
+case f
+    echo resize -r $screensize > $window
+case l
+    echo resize -r $screensize |
+    awk '{ printf("%s %s %d %d %d %d", $1, $2, $3, $4, $5/2, $6) }' > $window
+case r
+    echo resize -r $screensize |
+    awk '{ printf("%s %s %d %d %d %d", $1, $2, $5/2, $4, $5, $6) }' > $window
+case t
+    echo resize -r $screensize |
+    awk '{ printf("%s %s %d %d %d %d", $1, $2, $3, $4, $5, $6/2) }' > $window
+case b
+    echo resize -r $screensize |
+    awk '{ printf("%s %s %d %d %d %d", $1, $2, $3, $6/2, $5, $6) }' > $window
+case tl
+    echo resize -r $screensize |
+    awk '{ printf("%s %s %d %d %d %d", $1, $2, $3, $4, $5/2, $6/2) }' > $window
+case tr
+    echo resize -r $screensize |
+    awk '{ printf("%s %s %d %d %d %d", $1, $2, $5/2, $4, $5, $6/2) }' > $window
+case bl
+    echo resize -r $screensize |
+    awk '{ printf("%s %s %d %d %d %d", $1, $2, $3, $6/2, $5/2, $6) }' > $window
+case br
+    echo resize -r $screensize |
+    awk '{ printf("%s %s %d %d %d %d", $1, $2, $5/2, $6/2, $5, $6) }' > $window
+case u
+    echo resize -r $windowsize > $window
+    windowsize=()
+}
