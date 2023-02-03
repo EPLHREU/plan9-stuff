@@ -50,7 +50,6 @@ case 0  # called from acme
 	if(test $%){argument=$%}
 	if not {echo 'watch expects a filename as an argument'; exit}
 case 1  # called with file argument
-	echo 1 arg
 	argument=$1
 case *
 	{echo 'watch expects a filename as an argument'; exit}
@@ -99,12 +98,9 @@ if not{
 # always check the file can be executed to avoid failures
 chmod +x $watchFile
 
-# magic time
-bind -a $specificWatchDir `{dirname $file}
-
 
 # --- file change detection ---
-while() {
+{while() {
 
 	# calculate hash for the file, and remove spaces for parsing
 	newSum=`{sum $file | sed 's/ //g'}
@@ -118,7 +114,8 @@ while() {
 	}
 	
 	# execute the .watch file with the full name of the file as input
-	{$file^.watch $file}&
-}
+	# magic time
+	echo `{rfork; bind -a $specificWatchDir `{dirname $file} && $file^.watch $file}
+}}&
 
 # emi
