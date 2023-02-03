@@ -1,0 +1,119 @@
+#!/bin/rc
+
+# ------ watch ------
+# - run commands automatically upon updating a file -
+#
+# usage: 
+# 	from acme:
+# 		middle-click 'watch' from the tagline of the source file
+# 	from shell:
+# 		watch /dir/to/file
+# 
+# `watch` will constantly check the hash sum of a source file, and if it 
+# changes; will execute a watch shell file accociated with it that contains
+# instructions on what to do, now the file has changed with the source file
+# location as the first argument.
+# 
+# All watch files live in the $watchDir (/usr/$user/lib/watch/) directory 
+# that has the same layout as the root directory, but only containing watch 
+# files. When 'watch' is executed, the directory that contains the source
+# file in the $watchDir is bound over the root file system. Thus the watch
+# file appears as an executable in the same directory as the source file,
+# but only for the 'watch' process, where it is then executed.
+# 
+# As the watch files are saved mirroing the root directory, their contents
+# and logic is saved for each source file for the next time 'watch' is called. 
+# 
+# When 'watch' is executed upon a source file, the corresponding watch file
+# is echoed to be easily editable/viewable.
+# 
+# An examples could be:
+# - a main.c source file that has a watch file containing 'mk; mk test', thus
+#   when the C source is saved, the program is automatically built and tested. 
+# - as the watch file is bound under a different namespace, the watch file
+#   won't show up under source version control or filesystem copies. 
+
+
+# --- settings ---
+# set the directory for all the .watch files
+# can cover the whole filesystem 
+watchDir=$home^/lib/watch
+
+# time to sleep for between update checking
+snoozyness=1
+
+
+# --- filename normalisation ---
+# use the correct input when either called from acme or shell
+switch($#*){
+case 0  # called from acme
+	if(test $%) argument=$%
+	if not echo 'watch expects a filename as an argument'; exit
+case 1  # called with file argument
+	argument=$1
+case *
+	echo 'watch expects a filename as an argument'; exit
+}
+
+# work with files that are relative to acme's pwd, or absolute
+# file will always be absolute
+firstChar=`{echo $argument | awk '{print substr($0,0,1);}'}
+
+switch($firstChar){
+case '/'
+	file=$argument
+case *
+	file=`{pwd}^/$argument
+}
+
+
+# --- functions library ---
+fn dirname {
+	echo $1 |awk -F'/[^/]*$' '{print $1}'
+}
+
+
+# --- .watch file setup and bind ---
+# location of the directory to contain the .watch file
+specificWatchDir=$watchDir^`{dirname $file}
+
+# fill out the watch file tree
+mkdir -p $specificWatchDir
+
+watchFile=$specificWatchDir^/`{basename $file}^.watch
+
+# setup .watch file, creation, and execution privileges
+if(test ! -e $watchFile){
+	# if the .watch file doesn't exist, create one
+	# with a default rc shell hashbang
+	echo '#!/bin/rc' > $watchFile
+	echo >> $watchFile
+	echo >> $watchFile
+	echo Created new executable: $watchFile
+}
+# always check the file can be executed to avoid failures
+chmod +x $watchFile
+
+# magic time
+bind -a $specificWatchDir `{dirname $file}
+
+
+# --- file change detection ---
+while() {
+
+	# calculate hash for the file, and remove spaces for parsing
+	newSum=`{sum $file | sed 's/ //g'}
+	oldSum=$newSum
+	
+	# keep checking if the has has changed
+	while(test "$newSum" '=' "$oldSum"){
+		sleep $snoozyness
+		oldSum=$newSum
+		newSum=`{sum $file | sed 's/ //g'}
+	}
+	
+	# execute the .watch file with the full name of the file as input
+	{$file^.watch $file}&
+}
+
+# emi
