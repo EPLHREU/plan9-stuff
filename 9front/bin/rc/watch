@@ -47,13 +47,15 @@ snoozyness=1
 # use the correct input when either called from acme or shell
 switch($#*){
 case 0  # called from acme
-	if(test $%) argument=$%
-	if not echo 'watch expects a filename as an argument'; exit
+	if(test $%){argument=$%}
+	if not {echo 'watch expects a filename as an argument'; exit}
 case 1  # called with file argument
+	echo 1 arg
 	argument=$1
 case *
-	echo 'watch expects a filename as an argument'; exit
+	{echo 'watch expects a filename as an argument'; exit}
 }
+
 
 # work with files that are relative to acme's pwd, or absolute
 # file will always be absolute
@@ -90,6 +92,9 @@ if(test ! -e $watchFile){
 	echo >> $watchFile
 	echo >> $watchFile
 	echo Created new executable: $watchFile
+}
+if not{
+	echo Using executable: $watchFile
 }
 # always check the file can be executed to avoid failures
 chmod +x $watchFile
