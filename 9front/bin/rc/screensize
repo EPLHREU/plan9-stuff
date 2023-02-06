@@ -1,0 +1,16 @@
+#!/bin/rc
+
+scr=(`{cat /dev/draw/new >[2]/dev/null || status=''})
+
+width=$scr(11)
+height=$scr(12)
+
+switch($1){
+case '-h'
+	echo -n $height
+case '-w'
+	echo -n $width
+case *
+	echo -n $height
+	echo -n $width
+}

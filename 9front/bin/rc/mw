@@ -1,0 +1,83 @@
+#!/bin/rc
+
+# --- mw - manage windows ---
+# 	- your very own manager of windows 
+#
+# `mw` is used to set an exact size and position of the current window in rio based on fractional columns and rows.
+# this is based with the standard (0, 0) potition being in the top left for rio, so the top left is row 1, column 1.
+# 
+# with no arguments, mw will simply fullscreen the current window
+# 
+# with 2 arguments mw will place the current window in column $1 of total columns $2.
+# 	for example, to place a window on the left half of the screen you would want it to be in column 1, of 2 -> 'mw 1 2'
+# 	or to palce a window in the middle third of the screen, you would want it in column 2, of 3 -> 'mw 2 3'
+#
+# with 3 arguments, mw will place the current window in a span of columns from column $1, to and including column $2, out of a total of $3
+# 	for example, to place a window in the right two thirds of the screen you would want it from column 2 to 3, out of 3 -> 'mw 2 3 3'
+# 	or to place a window filling the middle of the screen with a bit of space to each side, you might want it in columns 2 to 4, of 5 -> 'mw 2 4 5'
+#
+# with 4 arguments, mw will place the current window in column $1 of $2, and row $3 of $4, restricting it verticaly and horizontally
+# 	for example, to place a window in the bottom left quarter, you want it in column 1, of 2 and row 2, of 2 -> 'mw 1 2 2 2'
+# 	or to palce a decent sidzed window in the direct middle of the screen, you might want it in column 2, of 3 and also in row 2 of 3 -> 'mw 2 3 2 3'
+#
+# with 6 arguments, mw will place the current window in a span of columns from $1 to $2 out of $3, and also in a span of rows from $4 to $5 out of $6
+# 	for example, to place a big window anchored to the top right, you might want it in columns 2, to 3 of 3, and rows 2, to 3, of 3 -> 'mw 2 3 3 2 3 3'
+# 
+# there may be an occasion where you want a window to fill the full width, but only have a small height, in this case you can specify the columns as x of x, or x to x of x, where x is any number 
+#	mw 
+# 	mw [ column ]		[ total columns ]
+#	mw [ start column ]	[ end column ]		[ total columns ]
+#	mw [ column ]		[ total columns ]	[ row ]				[ total rows ]
+#	mw [ start column ]	[ end column ]		[ total columns ]	[ start row ]	[ end row ]	[ total rows ]
+
+
+switch($#*){
+case 0			# fullscreen
+	state=full
+case 1			# single code '1 2 3 4' -> '1234'
+case 2			# col x of cols z
+	col=$1
+	cols=$2
+	state=column
+case 3			# col x to y of cols z
+	col=$1
+	colto=$2
+	cols=$3
+	state=columnspan
+case 4			# col x of cols z, and row a of rows c
+	col=$1
+	cols=$2
+	row=$3
+	rows=$4
+	state=rectangle
+case 6			# col x to y of cols z, and row a to b of rows c
+	col=$1
+	colto=$2
+	cols=$3
+	row=$4
+	rowto=$5
+	rows=$6
+	state=rectanglespan
+case *
+	echo supply 0, 2 or 4 arguments
+	exit
+}
+
+fn calc{echo $* | dc}
+fn setsize{echo -n resize -r $* > /dev/wctl}
+
+width=`{screensize -w}
+height=`{screensize -h}
+
+switch($state){
+case full
+	setsize 0											0											$width									$height								
+case column
+	setsize `{calc $width $cols '/' $col 1 '-' '*' p}	0											`{calc $width $cols '/' $col '*' p}		$height
+case columnspan
+	setsize `{calc $width $cols '/' $col 1 '-' '*' p}	0											`{calc $width $cols '/' $colto '*' p}	$height
+case rectangle
+	setsize `{calc $width $cols '/' $col 1 '-' '*' p}	`{calc $height $rows '/' $row 1 '-' '*' p}	`{calc $width $cols '/' $col '*' p}		`{calc $height $rows '/' $row '*' p}
+case rectanglespan
+	setsize `{calc $width $cols '/' $col 1 '-' '*' p}	`{calc $height $rows '/' $row 1 '-' '*' p}	`{calc $width $cols '/' $colto '*' p}	`{calc $height $rows '/' $rowto '*' p}
+}

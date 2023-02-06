@@ -64,7 +64,7 @@ switch($firstChar){
 case '/'
 	file=$argument
 case *
-	file=`{pwd}^/$argument
+	file=`{pwd}^/`{basename $argument}
 }
 
 
