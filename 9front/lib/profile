@@ -33,10 +33,13 @@ case cpu
 			read -m /mnt/term/dev/secstore >/mnt/factotum/ctl
 			echo >/mnt/term/dev/secstore
 		}
-		if not
+		if not {
 			auth/factotum
+		}
 		webcookies
 		webfs
+		bind -b '#S' /dev
+		u-init
 		plumber
 		rio -s -i rioout
 	}
