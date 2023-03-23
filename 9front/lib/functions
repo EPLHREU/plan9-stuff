@@ -1,0 +1,13 @@
+#!/bin/rc
+fn g..{cd `{git/conf -r}}
+fn popd{
+	nwd=`{tail -n 1 /env/dirstack}
+	sed '$d' /env/dirstack
+	cd $nwd
+	pwd
+}
+fn pushd{
+	cwd=`{pwd}
+	echo $cwd >> /env/dirstack
+	cd $1
+}

@@ -1,4 +1,4 @@
 #!/bin/rc
 
 winid=`{cat /mnt/wsys/winid | sed 's/ *//'}
-echo > /mnt/wsys/wsys/$winid/text
+echo -n > /mnt/wsys/wsys/$winid/text

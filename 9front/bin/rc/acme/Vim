@@ -1,0 +1,16 @@
+#!/bin/rc
+
+fileName=`{echo `{cat /mnt/acme/$winid/tag} | sed 's/ .*//'}
+
+firstChar=`{echo $fileName | awk '{print substr($0,0,1);}'}
+
+switch($firstChar){
+case '/'
+	file=$fileName
+case *
+	file=`{pwd}^/`{basename $fileName}
+}
+
+window vim $file
+
+echo ' Get' >> /mnt/acme/$winid/tag

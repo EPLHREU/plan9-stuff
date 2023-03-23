@@ -1,0 +1,5 @@
+#!/bin/rc
+
+git/fs
+git/branch
+git/walk | grep -v '^T'

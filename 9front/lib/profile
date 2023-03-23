@@ -1,6 +1,7 @@
 bind -qa $home/bin/rc /bin
 bind -qa $home/bin/$cputype /bin
 font=/lib/font/bit/vga/unicode.font
+GO111MODULE=on
 switch($service){
 case terminal
 	webcookies
@@ -22,7 +23,8 @@ case cpu
 		if not {
 			wsys=()
 		}
-	} 
+	}
+	bind -a $home/go/bin /bin
 	bind -a /mnt/term/dev /dev
 	prompt=(')(; ')
 	fn cpu%{ $* }
@@ -41,7 +43,10 @@ case cpu
 		bind -b '#S' /dev
 		u-init
 		plumber
-		rio -s -i rioout
+        bind -qac $home/bin/rc/git/ /bin/git/
+        bind -qac $home/bin/rc/acme/ /acme/bin/
+        eval $home/lib/functions
+		rio -s -i riostart -f /lib/font/bit/terminus/unicode.14.font
 	}
 case con
 	prompt=('cpu% ' '	')

@@ -1,0 +1,12 @@
+#!/bin/rc
+
+if (test -n $"*) {
+	message = $"*
+}
+if not {
+	message = y
+}
+
+while () {
+	echo $message
+}

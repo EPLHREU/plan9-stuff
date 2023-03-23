@@ -1,0 +1,8 @@
+#!/bin/rc
+
+for(pkg in /usr/$user/pkg/*){
+	echo ------ `{basename $pkg}------
+	cd $pkg
+	git/pull
+	mk install
+}
