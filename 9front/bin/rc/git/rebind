@@ -1,0 +1,20 @@
+#!/bin/rc
+
+ppwd=`{pwd}
+branch=`{git/branch | awk -F / '{print $2F}'}
+
+location=/usr/$user/lib/git-bind/fs/$ppwd/branches/
+
+unmount ./.git/fs >/dev/null
+
+pushd $location
+
+clone $branch $1
+
+unmount $ppwd
+
+bind -bc ./$1 $ppwd
+
+popd >/dev/null
+
+git/branch -n $1

@@ -1,0 +1,6 @@
+#!/bin/rc
+
+ppwd=`{pwd}
+unmount ./ >[2] /dev/null
+bind -bc /usr/$user/lib/git-bind/fs/$ppwd/branches/$1/ ./
+git/branch $1

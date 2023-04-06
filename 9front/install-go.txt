@@ -1,0 +1,73 @@
+# Go
+
+To install Go one has to bootstrap the installation with an earlier version of Go already compiled for Plan 9. The process consists of obtaining the bootstap version and the target version, followed by telling the target version to use the bootstrapped version in order to build the toolchain.
+
+Temporary scratch space:
+```sh
+term% ramfs
+term% cd /tmp
+```
+
+Download **bootstrap** and **target** versions of **go**:
+```sh
+term% hget http://www.9legacy.org/download/go/go1.6.4-plan9-amd64-bootstrap.tbz | bunzip2  -c | tar x 
+term% hget https://golang.org/dl/go1.16.4.src.tar.gz | gunzip -c | tar x
+```
+
+Create **target** installation directory and **bind** downloaded version to that directory:
+```sh
+term% mkdir -p /sys/lib/go/amd64-1.16.4
+term% bind -c go /sys/lib/go/amd64-1.16.4
+```
+
+Setup `GOROOT_BOOTSTRAP`:
+```sh
+term% cd /sys/lib/go/amd64-1.16.4/src 
+term% GOROOT_BOOTSTRAP=/tmp/go-plan9-amd64-bootstrap
+```
+
+To pass standard library tests configure loopback address:
+```sh
+term% ip/ipconfig -P loopback /dev/null 127.1 
+term% ip/ipconfig -P loopback /dev/null ::1
+```
+
+Start the install:
+```sh
+term% ./make.rc
+Building Go cmd/dist using /tmp/go-plan9-amd64-bootstrap
+Building Go toolchain1 using /tmp/go-plan9-amd64-bootstrap.
+Building Go bootstrap cmd/go (go_bootstrap) using Go toolchain1.
+Building Go toolchain2 using go_bootstrap and Go toolchain1.
+Building Go toolchain3 using go_bootstrap and Go toolchain2.
+Building packages and commands for plan9/amd64.
+---
+Installed Go for plan9/amd64 in /sys/lib/go/amd64-1.16.3
+Installed commands in /sys/lib/go/amd64-1.16.3/bin
+*** You need to bind /sys/lib/go/amd64-1.16.3/bin before /bin.
+```
+
+Persist installation and cleanup:
+```sh
+term% unmount /sys/lib/go/amd64-1.16.4
+term% dircp /tmp/go /sys/lib/go/amd64-1.16.4
+term% cp /sys/lib/go/amd64-1.16.4/bin/* /amd64/bin 
+term% unmount /tmp
+```
+
+Extend `$home/lib/profile` with:
+```sh
+term % cat $home/lib/profile
+...
+GO111MODULE=on
+switch($service){
+case terminal
+	bind -a $home/go/bin /bin
+...	
+```
+
+To build go modules CA certificates are required:
+```sh
+term% hget https://curl.haxx.se/ca/cacert.pem >/sys/lib/tls/ca.pem 
+```
+

@@ -1,0 +1,8 @@
+#!/bin/rc
+
+switch(`{os uname}){
+case Darwin
+	</dev/kbdtap riow-alt >/dev/kbdtap |[3] bar -b
+case Linux
+	</dev/kbdtap riow >/dev/kbdtap |[3] bar -b
+}

@@ -1,0 +1,30 @@
+#!/bin/rc
+
+ppwd=`{pwd}
+
+name=`{echo $1 | awk -F/ '{print $5F}' | sed 's/.git//g'}
+mkdir -p $name
+
+location=/usr/$user/lib/git-bind/fs/$ppwd/$name/clone/
+
+mkdir -p $location/../branches/
+pushd $location
+
+git/clone $1
+
+cd $name
+
+defaultBranch=`{git/branch | awk -F / '{print $2F}'}
+
+clone ./ ../../branches/$defaultBranch 
+cd ../../
+rm -r clone/
+
+echo $defaultBranch > default-branch.txt
+echo $ppwd/$name >> /usr/$user/lib/git-bind/repos.txt
+
+bind -bc ./branches/$defaultBranch $ppwd/$name
+
+popd >/dev/null
+cd $name
+

@@ -1,0 +1,4 @@
+#!/bin/rc
+
+ppwd=`{pwd}
+git/bind `{cat /usr/$user/lib/git-bind/fs/$ppwd/default-branch.txt}

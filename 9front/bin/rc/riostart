@@ -1,0 +1,3 @@
+#!/bin/rc
+window 'cat /usr/emi/lib/theme/rio.default.theme > /mnt/wsys/theme'
+window riow-ws

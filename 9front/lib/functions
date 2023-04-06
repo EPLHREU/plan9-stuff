@@ -2,7 +2,7 @@
 fn g..{cd `{git/conf -r}}
 fn popd{
 	nwd=`{tail -n 1 /env/dirstack}
-	sed '$d' /env/dirstack
+	sed '$d' /env/dirstack > /env/dirstack
 	cd $nwd
 	pwd
 }

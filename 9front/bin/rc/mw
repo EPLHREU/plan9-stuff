@@ -73,11 +73,11 @@ switch($state){
 case full
 	setsize 0											0											$width									$height								
 case column
-	setsize `{calc $width $cols '/' $col 1 '-' '*' p}	0											`{calc $width $cols '/' $col '*' p}		$height
+	setsize `{calc $col 1 '-' $width '*' $cols '/' p}	0											`{calc $col $width '*' $cols '/' p}		$height
 case columnspan
-	setsize `{calc $width $cols '/' $col 1 '-' '*' p}	0											`{calc $width $cols '/' $colto '*' p}	$height
+	setsize `{calc $col 1 '-' $width '*' $cols '/' p}	0											`{calc $colto $width '*' $cols '/' p}	$height
 case rectangle
-	setsize `{calc $width $cols '/' $col 1 '-' '*' p}	`{calc $height $rows '/' $row 1 '-' '*' p}	`{calc $width $cols '/' $col '*' p}		`{calc $height $rows '/' $row '*' p}
+	setsize `{calc $col 1 '-' $width '*' $cols '/' p}	`{calc $row 1 '-' $height '*' $rows '/' p}	`{calc $col $width '*' $cols '/' p}		`{calc $row $height '*' $rows '/' p}
 case rectanglespan
-	setsize `{calc $width $cols '/' $col 1 '-' '*' p}	`{calc $height $rows '/' $row 1 '-' '*' p}	`{calc $width $cols '/' $colto '*' p}	`{calc $height $rows '/' $rowto '*' p}
+	setsize `{calc $col 1 '-' $width '*' $cols '/' p}	`{calc $row 1 '-' $height '*' $rows '/' p}	`{calc $colto $width '*' $cols '/' p}	`{calc $rowto $height '*' $rows '/' p}
 }
